@@ -1,0 +1,44 @@
+# Entornos virtuales de Python
+venv/
+env/
+ENV/
+virtualenv/
+
+# Base de datos SQLite
+*.sqlite3
+*.db
+
+# Archivos de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.python-version
+
+# Django
+migrations/
+*.log
+local_settings.py
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de entorno
+.env
+.env.local
+
+# Archivos temporales
+temp/
+tmp/
+
+# Archivos de coverage
+htmlcov/
+.coverage
+.coverage.*
