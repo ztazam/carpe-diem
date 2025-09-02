@@ -1,0 +1,102 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-tasks me-2"></i>Mis Tareas</h1>
+    <div>
+        <a href="{% url 'crear_tarea' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Nueva Tarea
+        </a>
+        <a href="{% url 'modo_enfoque' %}" class="btn btn-warning ms-2">
+            <i class="fas fa-target-alt me-1"></i>Modo Enfoque
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Tareas Pendientes</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for tarea in tareas %}
+                    {% if tarea.estado == 'pendiente' %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center animate__animated animate__fadeInUp">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ tarea.titulo }}</h6>
+                            <p class="mb-1 text-muted small">{{ tarea.descripcion|truncatewords:10 }}</p>
+                            <small class="text-muted">Creada: {{ tarea.fecha_creacion|date:"d M Y" }}</small>
+                        </div>
+                        <!-- Encuentra los botones de cada tarea y reemplázalos con esto: -->
+                        <div class="btn-group">
+                            <a href="{% url 'toggle_tarea' tarea.id %}" class="btn btn-sm btn-success">
+                                <i class="fas fa-check"></i>
+                            </a>
+                            <a href="{% url 'editar_tarea' tarea.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'eliminar_tarea' tarea.id %}" class="btn btn-sm btn-outline-danger" 
+                            onclick="return confirm('¿Estás seguro de eliminar esta tarea?');">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% empty %}
+                    <div class="list-group-item">
+                        <p class="text-center text-muted mb-0">No hay tareas pendientes. ¡Crea una!</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Tareas Completadas</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for tarea in tareas %}
+                    {% if tarea.estado == 'completada' %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center animate__animated animate__fadeInUp">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 text-decoration-line-through text-muted">{{ tarea.titulo }}</h6>
+                            <small class="text-muted">Completada: {{ tarea.fecha_creacion|date:"d M Y" }}</small>
+                        </div>
+                        <a href="{% url 'toggle_tarea' tarea.id %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-undo"></i> Reabrir
+                        </a>
+                    </div>
+                    {% endif %}
+                {% empty %}
+                    <div class="list-group-item">
+                        <p class="text-center text-muted mb-0">No hay tareas completadas aún.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Resumen del Día</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Tareas pendientes:</strong> {{ tareas_pendientes }}</p>
+                <p><strong>Tareas completadas:</strong> {{ tareas_completadas }}</p>
+                <div class="progress mb-3">
+                    <!-- eslint-disable -->
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: {{ porcentaje_completado }}%;" 
+                         aria-valuenow="{{ porcentaje_completado }}" 
+                         aria-valuemin="0" aria-valuemax="100">
+                        {{ porcentaje_completado }}%
+                    </div>
+                </div>
+                <small class="text-muted">¡Sigue así!</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

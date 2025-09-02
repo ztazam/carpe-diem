@@ -1,0 +1,22 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2>Editar Tarea</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Título</label>
+                <input type="text" name="titulo" class="form-control" value="{{ tarea.titulo }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                <textarea name="descripcion" class="form-control" rows="3">{{ tarea.descripcion }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            <a href="{% url 'lista_tareas' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="text-center">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>🛑 Modo Enfoque Activado</strong> - Las distracciones están bloqueadas.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="card shadow-lg mb-4">
+        <div class="card-body">
+            <h2>Tarea en Progreso</h2>
+            <p class="display-6 text-primary">{{ tarea_activa.titulo }}</p>
+            <p class="lead">{{ tarea_activa.descripcion }}</p>
+            
+            <div class="timer-container mb-4">
+                <div class="display-1 text-success" id="timer">25:00</div>
+                <div class="btn-group mt-3">
+                    <button class="btn btn-success" id="startBtn">
+                        <i class="fas fa-play"></i> Iniciar
+                    </button>
+                    <button class="btn btn-danger" id="pauseBtn">
+                        <i class="fas fa-pause"></i> Pausar
+                    </button>
+                    <button class="btn btn-warning" id="resetBtn">
+                        <i class="fas fa-redo"></i> Reiniciar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="{% url 'lista_tareas' %}" class="btn btn-lg btn-danger">
+        <i class="fas fa-door-open"></i> Salir del Modo Enfoque
+    </a>
+</div>
+
+{% block extra_js %}
+<script>
+// JavaScript básico para el timer Pomodoro
+let timerInterval;
+let timeLeft = 25 * 60; // 25 minutos en segundos
+
+function updateTimer() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    document.getElementById('timer').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    if (timeLeft === 0) {
+        clearInterval(timerInterval);
+        alert('¡Tiempo completado! Toma un descanso de 5 minutos.');
+    }
+    timeLeft--;
+}
+
+document.getElementById('startBtn').addEventListener('click', () => {
+    timerInterval = setInterval(updateTimer, 1000);
+});
+
+document.getElementById('pauseBtn').addEventListener('click', () => {
+    clearInterval(timerInterval);
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+    clearInterval(timerInterval);
+    timeLeft = 25 * 60;
+    updateTimer();
+});
+
+// Inicializar timer
+updateTimer();
+</script>
+{% endblock %}
+{% endblock %}

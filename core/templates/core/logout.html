@@ -1,0 +1,9 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="text-center">
+    <h2>¡Has cerrado sesión!</h2>
+    <p>Gracias por usar CarpeDiem. Vuelve pronto.</p>
+    <a href="{% url 'login' %}" class="btn btn-primary">Volver a iniciar sesión</a>
+</div>
+{% endblock %}
