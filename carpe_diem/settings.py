@@ -126,3 +126,37 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = 'lista_tareas'
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'login'
+
+# Configuración para producción
+if 'RENDER' in os.environ:
+    # Settings ya existentes...
+    
+    # Agrega esto para evitar el timeout
+    WSGI_APPLICATION = 'carpe_diem.wsgi.application'
+    
+    # Logging para ver errores
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'root': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    }
+
+    # Al FINAL de settings.py
+import dj_database_url
+
+if 'RENDER' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
