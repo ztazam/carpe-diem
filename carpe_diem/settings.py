@@ -25,7 +25,18 @@ SECRET_KEY = 'django-insecure-o7@91qn&(+1jdi$#52jcbemv@6+0t5v-jj5a^gsvcmau%knhf^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# settings.py
+ALLOWED_HOSTS = [
+    'carpe-diem-v4dd.onrender.com',  # ⬅️ Tu URL de Render
+    'localhost',
+    '127.0.0.1',
+]
+
+# O MEJOR AÚN, para desarrollo y producción:
+if 'RENDER' in os.environ:
+    ALLOWED_HOSTS = ['carpe-diem-v4dd.onrender.com']
+else:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
