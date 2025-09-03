@@ -16,7 +16,8 @@ __pycache__/
 .python-version
 
 # Django
-migrations/
+*/migrations/*
+!core/migrations/
 *.log
 local_settings.py
 
