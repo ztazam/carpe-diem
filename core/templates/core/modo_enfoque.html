@@ -36,9 +36,10 @@
 </div>
 
 {% block extra_js %}
+
 <script>
-// JavaScript básico para el timer Pomodoro
-let timerInterval;
+// JavaScript corregido para el timer Pomodoro
+let timerInterval = null;
 let timeLeft = 25 * 60; // 25 minutos en segundos
 
 function updateTimer() {
@@ -47,23 +48,29 @@ function updateTimer() {
     document.getElementById('timer').textContent = 
         `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     
-    if (timeLeft === 0) {
+    if (timeLeft <= 0) {
         clearInterval(timerInterval);
+        timerInterval = null;
         alert('¡Tiempo completado! Toma un descanso de 5 minutos.');
+    } else {
+        timeLeft--;
     }
-    timeLeft--;
 }
 
 document.getElementById('startBtn').addEventListener('click', () => {
-    timerInterval = setInterval(updateTimer, 1000);
+    if (timerInterval === null) {
+        timerInterval = setInterval(updateTimer, 1000);
+    }
 });
 
 document.getElementById('pauseBtn').addEventListener('click', () => {
     clearInterval(timerInterval);
+    timerInterval = null;
 });
 
 document.getElementById('resetBtn').addEventListener('click', () => {
     clearInterval(timerInterval);
+    timerInterval = null;
     timeLeft = 25 * 60;
     updateTimer();
 });
@@ -71,5 +78,6 @@ document.getElementById('resetBtn').addEventListener('click', () => {
 // Inicializar timer
 updateTimer();
 </script>
+
 {% endblock %}
 {% endblock %}
