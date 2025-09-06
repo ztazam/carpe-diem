@@ -25,24 +25,28 @@
     </div>
 </div>
 
-<!-- Stripe.js -->
 <script src="https://js.stripe.com/v3/"></script>
 <script>
     const stripe = Stripe('{{ STRIPE_PUBLISHABLE_KEY }}');
     
-    document.getElementById('basicPlanBtn').addEventListener('click', () => {
-        fetch('/create-payment-intent/?amount=500', { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                return stripe.confirmCardPayment(data.client_secret);
-            })
-            .then(result => {
-                if (result.error) {
-                    alert('Pago fallido');
-                } else {
-                    alert('¡Pago exitoso!');
-                }
-            });
+    document.getElementById('premiumPlanBtn').addEventListener('click', async () => {
+        const response = await fetch('/create-checkout-session/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        const session = await response.json();
+        
+        // Redirigir a Checkout de Stripe
+        const result = await stripe.redirectToCheckout({
+            sessionId: session.id,
+        });
+        
+        if (result.error) {
+            alert(result.error.message);
+        }
     });
 </script>
 {% endblock %}

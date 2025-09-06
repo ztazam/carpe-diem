@@ -7,26 +7,36 @@ from .forms import RegistroForm
 import stripe
 from django.conf import settings
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 def premium(request):
     return render(request, 'core/premium.html', {
         'STRIPE_PUBLISHABLE_KEY': settings.STRIPE_PUBLISHABLE_KEY
     })
 
-def create_payment_intent(request):
+@csrf_exempt
+def create_checkout_session(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY
-    amount = request.GET.get('amount', 1000)  # Monto por defecto: $10.00
-    
     try:
-        intent = stripe.PaymentIntent.create(
-            amount=int(amount),
-            currency='usd',
-            metadata={'integration_check': 'accept_a_payment'},
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {
+                        'name': 'Plan Premium CarpeDiem',
+                    },
+                    'unit_amount': 1000,  # $10.00 en centavos
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url='https://carpe-diem-v4dd.onrender.com/success/',
+            cancel_url='https://carpe-diem-v4dd.onrender.com/cancel/',
         )
-        return JsonResponse({'client_secret': intent.client_secret})
+        return JsonResponse({'id': session.id})
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
-
+        return JsonResponse({'error': str(e)})
 
 def registro(request):
     if request.method == 'POST':
@@ -117,3 +127,9 @@ def eliminar_tarea(request, tarea_id):
     tarea = get_object_or_404(Tarea, id=tarea_id, usuario=request.user)
     tarea.delete()
     return redirect('lista_tareas')
+
+def success(request):
+    return render(request, 'core/success.html')
+
+def cancel(request):
+    return render(request, 'core/cancel.html')

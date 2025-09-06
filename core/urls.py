@@ -13,6 +13,8 @@ urlpatterns = [
     path('enfoque/', views.modo_enfoque, name='modo_enfoque'),
     path('editar/<int:tarea_id>/', views.editar_tarea, name='editar_tarea'),
     path('eliminar/<int:tarea_id>/', views.eliminar_tarea, name='eliminar_tarea'),
-    path('create-payment-intent/', views.create_payment_intent, name='create_payment_intent'),
+    path('create-checkout-session/', views.create_checkout_session, name='create_checkout_session'),
     path('premium/', views.premium, name='premium'),
+    path('success/', views.success, name='success'),
+    path('cancel/', views.cancel, name='cancel'),
 ]

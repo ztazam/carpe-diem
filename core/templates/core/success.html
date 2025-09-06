@@ -1,0 +1,9 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <h2>¡Pago Exitoso!</h2>
+    <p>Gracias por tu suscripción premium.</p>
+    <a href="{% url 'lista_tareas' %}" class="btn btn-primary">Volver a la App</a>
+</div>
+{% endblock %}
