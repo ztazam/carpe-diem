@@ -8,17 +8,24 @@ import stripe
 from django.conf import settings
 from django.http import JsonResponse
 
+def premium(request):
+    return render(request, 'core/premium.html', {
+        'STRIPE_PUBLISHABLE_KEY': settings.STRIPE_PUBLISHABLE_KEY
+    })
+
 def create_payment_intent(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY
+    amount = request.GET.get('amount', 1000)  # Monto por defecto: $10.00
+    
     try:
         intent = stripe.PaymentIntent.create(
-            amount=1000,  # $10.00 en centavos
+            amount=int(amount),
             currency='usd',
             metadata={'integration_check': 'accept_a_payment'},
         )
         return JsonResponse({'client_secret': intent.client_secret})
     except Exception as e:
-        return JsonResponse({'error': str(e)})
+        return JsonResponse({'error': str(e)}, status=400)
 
 
 def registro(request):

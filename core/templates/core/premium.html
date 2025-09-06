@@ -1,0 +1,48 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Planes Premium</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Plan Básico</h5>
+                    <p class="card-text">$5/mes - Estadísticas avanzadas</p>
+                    <button class="btn btn-primary" id="basicPlanBtn">Seleccionar</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Plan Premium</h5>
+                    <p class="card-text">$10/mes - Todas las características</p>
+                    <button class="btn btn-primary" id="premiumPlanBtn">Seleccionar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stripe.js -->
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    const stripe = Stripe('{{ STRIPE_PUBLISHABLE_KEY }}');
+    
+    document.getElementById('basicPlanBtn').addEventListener('click', () => {
+        fetch('/create-payment-intent/?amount=500', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                return stripe.confirmCardPayment(data.client_secret);
+            })
+            .then(result => {
+                if (result.error) {
+                    alert('Pago fallido');
+                } else {
+                    alert('¡Pago exitoso!');
+                }
+            });
+    });
+</script>
+{% endblock %}
