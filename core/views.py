@@ -4,6 +4,21 @@ from .models import Tarea
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from .forms import RegistroForm
+import stripe
+from django.conf import settings
+from django.http import JsonResponse
+
+def create_payment_intent(request):
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    try:
+        intent = stripe.PaymentIntent.create(
+            amount=1000,  # $10.00 en centavos
+            currency='usd',
+            metadata={'integration_check': 'accept_a_payment'},
+        )
+        return JsonResponse({'client_secret': intent.client_secret})
+    except Exception as e:
+        return JsonResponse({'error': str(e)})
 
 
 def registro(request):

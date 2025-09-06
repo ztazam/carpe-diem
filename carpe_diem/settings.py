@@ -171,3 +171,7 @@ if 'RENDER' in os.environ:
             ssl_require=True
         )
     }
+
+# Stripe Configuration
+STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY')
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
