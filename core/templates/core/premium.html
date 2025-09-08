@@ -25,37 +25,44 @@
     </div>
 </div>
 
+<!-- Stripe.js debe cargarse PRIMERO -->
+<script src="https://js.stripe.com/v3/"></script>
 <script>
-    document.getElementById('premiumPlanBtn').addEventListener('click', async () => {
-        try {
-            const response = await fetch('/create-checkout-session/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({})  // Body vacío pero necesario
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Error del servidor');
+    // Esperar a que Stripe.js se cargue completamente
+    document.addEventListener('DOMContentLoaded', function() {
+        const stripe = Stripe('{{ STRIPE_PUBLISHABLE_KEY }}');
+        
+        document.getElementById('premiumPlanBtn').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/create-checkout-session/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Error del servidor');
+                }
+                
+                const session = await response.json();
+                
+                // Redirigir a Checkout de Stripe
+                const result = await stripe.redirectToCheckout({
+                    sessionId: session.id,
+                });
+                
+                if (result.error) {
+                    alert('Error: ' + result.error.message);
+                }
+            } catch (error) {
+                console.error('Error completo:', error);
+                alert('Error al crear la sesión de pago: ' + error.message);
             }
-            
-            const session = await response.json();
-            
-            // Redirigir a Checkout de Stripe
-            const result = await stripe.redirectToCheckout({
-                sessionId: session.id,
-            });
-            
-            if (result.error) {
-                alert('Error: ' + result.error.message);
-            }
-        } catch (error) {
-            console.error('Error completo:', error);
-            alert('Error al crear la sesión de pago: ' + error.message);
-        }
+        });
     });
 </script>
 
