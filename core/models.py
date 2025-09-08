@@ -3,10 +3,26 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+class Payment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    stripe_session_id = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed')
+    ])
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.amount}"
+
 class PerfilUsuario(models.Model):
     usuario = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.TextField(max_length=500, blank=True)
     objetivo_diario = models.CharField(max_length=200, default="Enfocarse 4 hoas al día")
+    is_premium = models.BooleanField(default=False)
+    premium_since = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Perfil de {self.usuario.username}" 

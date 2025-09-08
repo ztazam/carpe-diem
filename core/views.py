@@ -8,14 +8,58 @@ import stripe
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+import json
 
-def premium(request):
-    return render(request, 'core/premium.html', {
-        'STRIPE_PUBLISHABLE_KEY': settings.STRIPE_PUBLISHABLE_KEY
-    })
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE', '')
+    
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError:
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError:
+        return HttpResponse(status=400)
+
+    # Manejar el evento de pago exitoso
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        handle_checkout_session(session)
+    
+    return HttpResponse(status=200)
+
+def handle_checkout_session(session):
+    user_id = session.get('client_reference_id')
+    if user_id:
+        try:
+            user = User.objects.get(id=user_id)
+            # Actualizar perfil a premium
+            perfil = PerfilUsuario.objects.get(usuario=user)
+            perfil.is_premium = True
+            perfil.save()
+            
+            # Registrar el pago
+            Payment.objects.create(
+                user=user,
+                stripe_session_id=session['id'],
+                amount=session['amount_total'] / 100,
+                status='completed'
+            )
+            
+            print(f"✅ Usuario {user.username} actualizado a premium")
+            
+        except (User.DoesNotExist, PerfilUsuario.DoesNotExist) as e:
+            print(f"❌ Error: {str(e)}")
 
 @csrf_exempt
 def create_checkout_session(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Not authenticated'}, status=401)
+    
     stripe.api_key = settings.STRIPE_SECRET_KEY
     try:
         session = stripe.checkout.Session.create(
@@ -23,20 +67,24 @@ def create_checkout_session(request):
             line_items=[{
                 'price_data': {
                     'currency': 'usd',
-                    'product_data': {
-                        'name': 'Plan Premium CarpeDiem',
-                    },
-                    'unit_amount': 1000,  # $10.00 en centavos
+                    'product_data': {'name': 'Plan Premium CarpeDiem'},
+                    'unit_amount': 1000,  # $10.00
                 },
                 'quantity': 1,
             }],
             mode='payment',
             success_url='https://carpe-diem-v4dd.onrender.com/success/',
             cancel_url='https://carpe-diem-v4dd.onrender.com/cancel/',
+            client_reference_id=str(request.user.id),  # ⬅️ ID del usuario
         )
         return JsonResponse({'id': session.id})
     except Exception as e:
         return JsonResponse({'error': str(e)})
+
+def premium(request):
+    return render(request, 'core/premium.html', {
+        'STRIPE_PUBLISHABLE_KEY': settings.STRIPE_PUBLISHABLE_KEY
+    })
 
 def registro(request):
     if request.method == 'POST':
