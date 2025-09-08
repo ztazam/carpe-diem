@@ -56,6 +56,9 @@ def handle_checkout_session(session):
         except (User.DoesNotExist, PerfilUsuario.DoesNotExist) as e:
             print(f"❌ Error: {str(e)}")
 
+import json
+from django.views.decorators.csrf import csrf_exempt
+
 @csrf_exempt
 def create_checkout_session(request):
     if not request.user.is_authenticated:
@@ -63,24 +66,28 @@ def create_checkout_session(request):
     
     stripe.api_key = settings.STRIPE_SECRET_KEY
     try:
+        # Leer el JSON del body si es necesario
+        data = json.loads(request.body) if request.body else {}
+        
         session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
                 'price_data': {
                     'currency': 'usd',
                     'product_data': {'name': 'Plan Premium CarpeDiem'},
-                    'unit_amount': 1000,  # $10.00
+                    'unit_amount': 1000,
                 },
                 'quantity': 1,
             }],
             mode='payment',
             success_url='https://carpe-diem-v4dd.onrender.com/success/',
             cancel_url='https://carpe-diem-v4dd.onrender.com/cancel/',
-            client_reference_id=str(request.user.id),  # ⬅️ ID del usuario
+            client_reference_id=str(request.user.id),
         )
         return JsonResponse({'id': session.id})
     except Exception as e:
-        return JsonResponse({'error': str(e)})
+        print(f"Error en create_checkout_session: {str(e)}")  # Para debug
+        return JsonResponse({'error': str(e)}, status=400)
 
 def premium(request):
     return render(request, 'core/premium.html', {

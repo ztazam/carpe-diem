@@ -34,10 +34,12 @@
                     'Content-Type': 'application/json',
                     'X-CSRFToken': '{{ csrf_token }}'
                 },
+                body: JSON.stringify({})  // Body vacío pero necesario
             });
             
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error del servidor');
             }
             
             const session = await response.json();
@@ -51,8 +53,8 @@
                 alert('Error: ' + result.error.message);
             }
         } catch (error) {
-            console.error('Error:', error);
-            alert('Error al crear la sesión de pago');
+            console.error('Error completo:', error);
+            alert('Error al crear la sesión de pago: ' + error.message);
         }
     });
 </script>
