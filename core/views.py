@@ -109,8 +109,9 @@ def premium(request):
 
 @login_required
 def dashboard_premium(request):
-    if not request.user.profile.is_premium:
-        return redirect('premium')
+    # Verificar si el usuario es premium
+    if not hasattr(request.user, 'profile') or not request.user.profile.is_premium:
+        return redirect('premium')  # Redirigir a la página de planes
     return render(request, 'core/dashboard_premium.html')
 
 def registro(request):
