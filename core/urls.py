@@ -18,4 +18,5 @@ urlpatterns = [
     path('success/', views.success, name='success'),
     path('cancel/', views.cancel, name='cancel'),
     path('stripe-webhook/', views.stripe_webhook, name='stripe_webhook'),
+    path('dashboard-premium/', views.dashboard_premium, name='dashboard_premium'),
 ]
