@@ -70,5 +70,5 @@ class ResumenDiario(models.Model):
 
     @receiver(post_save, sender=User)
     def guardar_perfil_usuario(sender, instance, **kwargs):
-    if hasattr(instance, 'profile'):
-        instance.profile.save()
+        if hasattr(instance, 'profile'):
+            instance.profile.save()
