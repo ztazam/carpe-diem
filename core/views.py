@@ -107,6 +107,12 @@ def premium(request):
         'STRIPE_PUBLISHABLE_KEY': settings.STRIPE_PUBLISHABLE_KEY
     })
 
+@login_required
+def dashboard_premium(request):
+    if not request.user.profile.is_premium:
+        return redirect('premium')
+    return render(request, 'core/dashboard_premium.html')
+
 def registro(request):
     if request.method == 'POST':
         form = RegistroForm(request.POST)
