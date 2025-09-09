@@ -38,12 +38,12 @@ def handle_checkout_session(session):
     if user_id:
         try:
             user = User.objects.get(id=user_id)
-            # Actualizar perfil a premium
-            perfil = PerfilUsuario.objects.get(usuario=user)
-            perfil.is_premium = True
-            perfil.save()
+            profile = user.profile  # Asumiendo que tienes un perfil vinculado
+            profile.is_premium = True
+            profile.premium_since = timezone.now()
+            profile.save()
             
-            # Registrar el pago
+            # Registrar el pago en tu base de datos
             Payment.objects.create(
                 user=user,
                 stripe_session_id=session['id'],
@@ -53,11 +53,8 @@ def handle_checkout_session(session):
             
             print(f"✅ Usuario {user.username} actualizado a premium")
             
-        except (User.DoesNotExist, PerfilUsuario.DoesNotExist) as e:
-            print(f"❌ Error: {str(e)}")
-
-import json
-from django.views.decorators.csrf import csrf_exempt
+        except User.DoesNotExist:
+            print("❌ Usuario no encontrado")
 
 @csrf_exempt
 def create_checkout_session(request):
@@ -88,6 +85,22 @@ def create_checkout_session(request):
     except Exception as e:
         print(f"Error en create_checkout_session: {str(e)}")  # Para debug
         return JsonResponse({'error': str(e)}, status=400)
+
+def create_subscription_session(request):
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=[{
+            'price': 'price_tu_id_de_suscripcion_mensual',  # Obtener de Stripe Dashboard
+            'quantity': 1,
+        }],
+        mode='subscription',  # Modo suscripción, no pago único
+        success_url=request.build_absolute_uri('/success/'),
+        cancel_url=request.build_absolute_uri('/premium/'),
+        client_reference_id=str(request.user.id),
+    )
+    return JsonResponse({'id': session.id})
 
 def premium(request):
     return render(request, 'core/premium.html', {
