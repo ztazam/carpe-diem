@@ -116,13 +116,25 @@ def dashboard_premium(request):
 
 def registro(request):
     if request.method == 'POST':
-        form = RegistroForm(request.POST)
+        form = UserCreationForm(request.POST)
         if form.is_valid():
+            # Validar que las contraseñas coincidan
+            if form.cleaned_data['password1'] != form.cleaned_data['password2']:
+                return render(request, 'core/registro.html', {
+                    'form': form,
+                    'error': 'Las contraseñas no coinciden'
+                })
             user = form.save()
             login(request, user)
             return redirect('lista_tareas')
+        else:
+            # Si el formulario no es válido, mostrar errores
+            return render(request, 'core/registro.html', {
+                'form': form,
+                'error': 'Por favor, corrige los errores a continuación.'
+            })
     else:
-        form = RegistroForm()
+        form = UserCreationForm()
     return render(request, 'core/registro.html', {'form': form})
 
 def login_usuario(request):
@@ -133,7 +145,11 @@ def login_usuario(request):
         if user is not None:
             login(request, user)
             return redirect('lista_tareas')
-        return render(request, 'core/login.html')
+        else:
+            return render(request, 'core/login.html', {
+                'error': 'Usuario o contraseña incorrectos'
+            })
+    return render(request, 'core/login.html')
 
 
 @login_required

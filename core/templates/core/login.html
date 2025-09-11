@@ -21,4 +21,28 @@
         </p>
     </div>
 </div>
+
+{% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const username = document.querySelector('input[name="username"]').value;
+        const password = document.querySelector('input[name="password"]').value;
+        
+        if (!username || !password) {
+            e.preventDefault();
+            alert('Por favor, completa todos los campos');
+            return false;
+        }
+        return true;
+    });
+});
+</script>
+
 {% endblock %}
