@@ -1,3 +1,5 @@
+import json
+import time
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Tarea
@@ -9,10 +11,9 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
-import json
-import time
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.contrib.auth.models import User
+
 
 @csrf_exempt
 def stripe_webhook(request):
@@ -116,59 +117,29 @@ def dashboard_premium(request):
         return redirect('premium')  # Redirigir a la página de planes
     return render(request, 'core/dashboard_premium.html')
 
-@ensure_csrf_cookie
 def registro(request):
-    # Si el usuario ya está autenticado, redirigir al dashboard
-    if request.user.is_authenticated:
-        return redirect('lista_tareas')
-    
     if request.method == 'POST':
         form = RegistroForm(request.POST)
         if form.is_valid():
+            # Guardar el usuario
             user = form.save()
-            try:
-                user_refreshed = User.objects.get(username=user.username)
-                login(request, user_refreshed)
+            
+            # Autenticar y loguear al usuario inmediatamente
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=password)
+            
+            if user is not None:
+                login(request, user)
                 return redirect('lista_tareas')
-            except User.DoesNotExist:
-                # Reintentar después de breve pausa
-                time.sleep(0.5)
-                try:
-                    user_refreshed = User.objects.get(username=user.username)
-                    login(request, user_refreshed)
-                    return redirect('lista_tareas')
-                except User.DoesNotExist:
-                    form.add_error(None, 'Error al crear usuario. Intenta nuevamente.')
-            login(request, user)
-            return redirect('lista_tareas')
+            else:
+                # Si la autenticación falla, redirigir al login
+                return redirect('login')
     else:
         form = RegistroForm()
     
     return render(request, 'core/registro.html', {'form': form})
-
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            # Validar que las contraseñas coincidan
-            if form.cleaned_data['password1'] != form.cleaned_data['password2']:
-                return render(request, 'core/registro.html', {
-                    'form': form,
-                    'error': 'Las contraseñas no coinciden'
-                })
-            user = form.save()
-            print(f"Usuario {user.username} creado exitosamente")
-            login(request, user)
-            return redirect('lista_tareas')
-        else:
-            # Si el formulario no es válido, mostrar errores
-            return render(request, 'core/registro.html', {
-                'form': form,
-                'error': 'Por favor, corrige los errores a continuación.'
-            })
-    else:
-        form = UserCreationForm()
-    return render(request, 'core/registro.html', {'form': form})
-
+    
 def login_usuario(request):
     if request.method == 'POST':
         username = request.POST['username']
