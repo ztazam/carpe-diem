@@ -125,6 +125,7 @@ def registro(request):
                     'error': 'Las contraseñas no coinciden'
                 })
             user = form.save()
+            print(f"Usuario {user.username} creado exitosamente")
             login(request, user)
             return redirect('lista_tareas')
         else:
