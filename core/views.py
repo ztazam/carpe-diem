@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 @csrf_exempt
 def stripe_webhook(request):
@@ -114,6 +115,7 @@ def dashboard_premium(request):
         return redirect('premium')  # Redirigir a la página de planes
     return render(request, 'core/dashboard_premium.html')
 
+@ensure_csrf_cookie
 def registro(request):
     # Si el usuario ya está autenticado, redirigir al dashboard
     if request.user.is_authenticated:
