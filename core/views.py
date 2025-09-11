@@ -119,24 +119,42 @@ def dashboard_premium(request):
 
 def registro(request):
     if request.method == 'POST':
-        form = RegistroForm(request.POST)
+        form = UserCreationForm(request.POST)
+        
         if form.is_valid():
-            # Guardar el usuario
-            user = form.save()
+            try:
+                # Intentar guardar el usuario
+                user = form.save(commit=False)
+                user.email = form.cleaned_data.get('email', '')
+                user.save()
+                
+                # Pequeña pausa para sincronización de BD
+                time.sleep(1)
+                
+                # Autenticar al usuario recién creado
+                username = form.cleaned_data.get('username')
+                password = form.cleaned_data.get('password1')
+                user = authenticate(username=username, password=password)
+                
+                if user is not None:
+                    login(request, user)
+                    return redirect('lista_tareas')
+                else:
+                    # Reintentar autenticación después de breve pausa
+                    time.sleep(0.5)
+                    user = authenticate(username=username, password=password)
+                    if user:
+                        login(request, user)
+                        return redirect('lista_tareas')
+                    else:
+                        form.add_error(None, 'Error al autenticar usuario después del registro')
             
-            # Autenticar y loguear al usuario inmediatamente
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=password)
-            
-            if user is not None:
-                login(request, user)
-                return redirect('lista_tareas')
-            else:
-                # Si la autenticación falla, redirigir al login
-                return redirect('login')
+            except IntegrityError:
+                form.add_error('username', 'El usuario ya existe')
+            except Exception as e:
+                form.add_error(None, f'Error inesperado: {str(e)}')
     else:
-        form = RegistroForm()
+        form = UserCreationForm()
     
     return render(request, 'core/registro.html', {'form': form})
     
