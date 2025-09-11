@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 import json
+import time
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.csrf import ensure_csrf_cookie
 
@@ -125,6 +126,19 @@ def registro(request):
         form = RegistroForm(request.POST)
         if form.is_valid():
             user = form.save()
+            try:
+                user_refreshed = User.objects.get(username=user.username)
+                login(request, user_refreshed)
+                return redirect('lista_tareas')
+            except User.DoesNotExist:
+                # Reintentar después de breve pausa
+                time.sleep(0.5)
+                try:
+                    user_refreshed = User.objects.get(username=user.username)
+                    login(request, user_refreshed)
+                    return redirect('lista_tareas')
+                except User.DoesNotExist:
+                    form.add_error(None, 'Error al crear usuario. Intenta nuevamente.')
             login(request, user)
             return redirect('lista_tareas')
     else:
