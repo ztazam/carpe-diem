@@ -115,6 +115,21 @@ def dashboard_premium(request):
     return render(request, 'core/dashboard_premium.html')
 
 def registro(request):
+    # Si el usuario ya está autenticado, redirigir al dashboard
+    if request.user.is_authenticated:
+        return redirect('lista_tareas')
+    
+    if request.method == 'POST':
+        form = RegistroForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('lista_tareas')
+    else:
+        form = RegistroForm()
+    
+    return render(request, 'core/registro.html', {'form': form})
+
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():

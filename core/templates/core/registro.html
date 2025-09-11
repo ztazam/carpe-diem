@@ -46,6 +46,19 @@
 {% endif %}
 
 <script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    // Prevenir envíos duplicados
+    const submitBtn = this.querySelector('button[type="submit"]');
+    if (submitBtn.disabled) {
+        e.preventDefault();
+        return;
+    }
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Registrando...';
+});
+</script>
+
+<script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
     form.addEventListener('submit', function(e) {
