@@ -13,6 +13,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib.auth.models import User
+from django.db import IntegrityError
+
+
 
 
 @csrf_exempt
@@ -119,13 +122,12 @@ def dashboard_premium(request):
 
 def registro(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = RegistroForm(request.POST)
         
         if form.is_valid():
             try:
                 # Intentar guardar el usuario
                 user = form.save(commit=False)
-                user.email = form.cleaned_data.get('email', '')
                 user.save()
                 
                 # Pequeña pausa para sincronización de BD
@@ -154,7 +156,7 @@ def registro(request):
             except Exception as e:
                 form.add_error(None, f'Error inesperado: {str(e)}')
     else:
-        form = UserCreationForm()
+        form = RegistroForm()
     
     return render(request, 'core/registro.html', {'form': form})
     
