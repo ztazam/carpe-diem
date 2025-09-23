@@ -14,6 +14,8 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib.auth.models import User
 from django.db import IntegrityError
+from django.contrib.sites.shortcuts import get_current_site
+from allauth.account.utils import send_email_confirmation
 
 
 
@@ -128,8 +130,10 @@ def registro(request):
             try:
                 # Intentar guardar el usuario
                 user = form.save(commit=False)
+                current_site = get_current_site(request)
+                send_email_confirmation(request, user, current_site=current_site)
                 user.save()
-                
+                                
                 # Pequeña pausa para sincronización de BD
                 time.sleep(1)
                 
