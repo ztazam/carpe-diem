@@ -57,11 +57,6 @@ INSTALLED_APPS = [
 ]
 SITE_ID = 1
 
-site = Site.objects.get(id=1)
-site.domain = 'carpe-diem-v4dd.onrender.com'
-site.name = 'CarpeDiem'
-site.save()
-
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
