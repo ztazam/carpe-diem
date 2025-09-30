@@ -16,8 +16,7 @@ from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.contrib.sites.shortcuts import get_current_site
 from allauth.account.adapter import get_adapter
-
-
+from allauth.account.models import EmailAddress, EmailConfirmation
 
 
 @csrf_exempt
@@ -128,15 +127,24 @@ def registro(request):
         
         if form.is_valid():
             try:
-                # Intentar guardar el usuario
+                # Guardar el usuario PRIMERO
                 user = form.save(commit=False)
-                current_site = get_current_site(request)
+                user.save()  # ⬅️ ESTO ES CRÍTICO: guardar antes de crear email confirmation
+                
+                # Crear el EmailAddress para el usuario
+                email_address = EmailAddress.objects.create(
+                    user=user,
+                    email=user.email,
+                    primary=True,
+                    verified=False
+                )
+                
+                # Crear la confirmación de email
+                emailconfirmation = EmailConfirmation.create(email_address)
+                
+                # AHORA sí enviar el email de confirmación
                 adapter = get_adapter()
                 adapter.send_confirmation_mail(request, emailconfirmation, signup=True)
-                user.save()
-                                
-                # Pequeña pausa para sincronización de BD
-                time.sleep(1)
                 
                 # Autenticar al usuario recién creado
                 username = form.cleaned_data.get('username')
