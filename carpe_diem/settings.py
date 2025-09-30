@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 from pathlib import Path
+from django.contrib.sites.models import Site
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -55,6 +56,11 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
 ]
 SITE_ID = 1
+
+site = Site.objects.get(id=1)
+site.domain = 'carpe-diem-v4dd.onrender.com'
+site.name = 'CarpeDiem'
+site.save()
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
