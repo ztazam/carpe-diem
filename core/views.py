@@ -15,7 +15,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.contrib.sites.shortcuts import get_current_site
-from allauth.account.utils import send_email_confirmation
+from allauth.account.adapter import get_adapter
 
 
 
@@ -131,7 +131,8 @@ def registro(request):
                 # Intentar guardar el usuario
                 user = form.save(commit=False)
                 current_site = get_current_site(request)
-                send_email_confirmation(request, user, current_site=current_site)
+                adapter = get_adapter()
+                adapter.send_confirmation_mail(request, emailconfirmation, signup=True)
                 user.save()
                                 
                 # Pequeña pausa para sincronización de BD
