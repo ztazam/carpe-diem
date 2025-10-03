@@ -71,7 +71,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    'core.middleware.PremiumAccessMiddleware',
+    #'core.middleware.PremiumAccessMiddleware',
 ]
 
 ROOT_URLCONF = 'carpe_diem.urls'

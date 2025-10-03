@@ -75,7 +75,7 @@ class ResumenDiario(models.Model):
     def crear_perfil_usuario(sender, instance, created, **kwargs):
         if created:
             
-            PerfilUsuario.objects.create(user=instance)
+            PerfilUsuario.objects.create(usuario=instance)
 
     #@receiver(post_save, sender=User)
     #def guardar_perfil_usuario(sender, instance, **kwargs):
