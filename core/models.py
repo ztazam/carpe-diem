@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 class Payment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -18,14 +19,27 @@ class Payment(models.Model):
         return f"{self.user.username} - {self.amount}"
 
 class PerfilUsuario(models.Model):
-    usuario = models.OneToOneField(User, on_delete=models.CASCADE)
-    bio = models.TextField(max_length=500, blank=True)
-    objetivo_diario = models.CharField(max_length=200, default="Enfocarse 4 hoas al día")
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     is_premium = models.BooleanField(default=False)
     premium_since = models.DateTimeField(null=True, blank=True)
-
+    premium_expires_at = models.DateTimeField(null=True, blank=True)
+    
+    def tiene_acceso_premium(self):
+        """Verifica si el usuario tiene acceso premium activo"""
+        if self.is_premium and self.premium_expires_at:
+            return timezone.now() < self.premium_expires_at
+        return self.is_premium
+    
+    def activar_premium(self, dias=30):
+        """Activa la suscripción premium por X días"""
+        self.is_premium = True
+        self.premium_since = timezone.now()
+        self.premium_expires_at = timezone.now() + timezone.timedelta(days=dias)
+        self.save()
+        return True
+    
     def __str__(self):
-        return f"Perfil de {self.usuario.username}" 
+        return f"Perfil de {self.user.username} - Premium: {self.is_premium}" 
 
 class Tarea(models.Model):
     ESTADOS = [

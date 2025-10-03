@@ -19,6 +19,7 @@ urlpatterns = [
     path('cancel/', views.cancel, name='cancel'),
     path('stripe-webhook/', views.stripe_webhook, name='stripe_webhook'),
     path('dashboard-premium/', views.dashboard_premium, name='dashboard_premium'),
+    path('prueba-premium/', views.prueba_premium, name='prueba_premium'),
     path('password_reset/', 
          auth_views.PasswordResetView.as_view(
              template_name='core/password_reset.html',

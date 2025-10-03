@@ -187,6 +187,15 @@ def login_usuario(request):
             })
     return render(request, 'core/login.html')
 
+def prueba_premium(request):
+    """Vista para probar el middleware premium"""
+    contexto = {
+        'usuario': request.user.username,
+        'tiene_premium': getattr(request, 'tiene_premium', False),
+        'autenticado': request.user.is_authenticated,
+    }
+    return JsonResponse(contexto)
+
 
 @login_required
 def lista_tareas(request):
